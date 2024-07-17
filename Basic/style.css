@@ -1,0 +1,33 @@
+body {
+  background-color: #000000e8;
+  color: #ffffff;
+
+  & .nav-bar > div{
+    color: #787878e8;
+    border-bottom: 1px solid white;
+    position: sticky;
+
+    & ul {
+        display: flex;
+        list-style: none;
+        justify-content: center;
+        
+    
+        
+        & li {
+            border-radius: 1.5rem;
+            padding: 0.5rem;
+            margin: 0.3rem;
+
+            & a {
+                text-decoration: none;
+                color: #787878e8;
+            }
+        }
+
+        & li:hover {
+            background-color: #231d1d;
+        }
+    }
+  }
+}

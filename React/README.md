@@ -673,7 +673,7 @@ export default updatedComponent;
  }
 ```
 
-## Context
+## [Context](react-context)
 
 ![alt text](image.png)
 
@@ -892,3 +892,342 @@ class PostUser extends Component {
 ```
 
 # [React Hooks](react-hooks)
+
+Hooks in react are not supported in class component
+
+## UseState
+
+```javascript
+function HookCounter() {
+  const [count, setCount] = useState(0);
+  return <button onClick={() => setCount(count + 1)}>Count : {count}</button>;
+}
+```
+
+### Use State with Previous state
+
+```javascript
+function HookCounterTwo() {
+  const initalState = 0;
+  const [count, setCount] = useState(initalState);
+
+  const incrementFive = () => {
+    for (let i = 0; i < 5; i++) {
+      setCount((prevState) => prevState + 1);
+    }
+  };
+  return (
+    <div>
+      <p>count : {count}</p>
+      <button onClick={() => setCount(initalState)}>Reset</button>
+      <button onClick={() => setCount(count + 1)}>Increment</button>
+      <button onClick={() => setCount(count - 1)}>Decrement</button>
+      <button onClick={incrementFive}>Increment by 5</button>
+    </div>
+  );
+}
+
+export default HookCounterTwo;
+```
+
+### Use State with Object
+
+```javascript
+function StateObject() {
+  const [name, setName] = useState({ firstName: "", lastName: "" });
+  return (
+    <div>
+      <input
+        name={name.firstName}
+        value={name.firstName}
+        onClick={() => setName({ ...name, firstName: e.target.value })}
+      />
+      <input
+        name={name.lastName}
+        value={name.lastName}
+        onClick={() => setName({ ...name, lastName: e.target.value })}
+      />
+    </div>
+  );
+}
+
+export default HookCounterTwo;
+```
+
+### Use State with Array
+
+```javascript
+function StateObject() {
+  const [items, setItems] = useState([]);
+
+  const addItem = () => {
+    setItems([
+      ...items,
+      {
+        id: items.length,
+        value: Math.floor(Math.random() * 10) + 1,
+      },
+    ]);
+  };
+  return (
+    <div>
+      <button onClick={addItem}>Add Item</button>
+      <ul>
+        {items.map((item) => (
+          <li key={item.key}>item.value</li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+export default HookCounterTwo;
+```
+
+## `useEffect`
+
+- This hook is called on every render just like `componentDidUpdate` hook
+
+```javascript
+import React, { useEffect, useState } from "react";
+
+function CountEffect() {
+  const [count, setCount] = useState(0);
+  useEffect(() => {
+    document.title = `Button clicked ${count} times`;
+  });
+  return <button onClick={() => setCount(count + 1)}>Click : {count}</button>;
+}
+
+export default CountEffect;
+```
+
+### Example 2
+
+- 2nd parameter of useEffect specifies that after every count update effect should render
+
+```javascript
+import React, { useEffect, useState } from "react";
+
+function CountEffect() {
+  const [count, setCount] = useState(0);
+  const [name, setName] = useState("");
+  useEffect(() => {
+    console.log("Button clicked");
+    document.title = `Button clicked ${count} times`;
+  }, [count]);
+  return (
+    <div>
+      <input value={name} onChange={(e) => setName(e.target.value)} />
+      <button onClick={() => setCount(count + 1)}>Click : {count}</button>
+    </div>
+  );
+}
+
+export default CountEffect;
+```
+
+### useEffect cleanup
+
+- `useEffect` still listens to the events even after you destroy/unmount your component
+- useEffects 1st argument accepts function and same function can return another function to destroy the event as shown below
+
+```javascript
+function MouseHook() {
+  const [x, setX] = useState(0);
+  const [y, setY] = useState(0);
+
+  const logMousePosition = (e) => {
+    setX(e.clintX);
+    setY(e.clintY);
+  };
+  useEffect(() => {
+    window.attachEventListener("mousemove", logMousePosition);
+    return () => {
+      window.removeEventListener("mousemove", logMousePosition);
+    };
+  }, []);
+
+  return (
+    <div>
+      X: {x}, Y: {y}
+    </div>
+  );
+}
+```
+
+### HTTP Request using useEffect
+
+- in the below example demonstrate how we can fetch a data on a button click
+
+```javascript
+import axios from "axios";
+import React, { useEffect, useState } from "react";
+
+function FetchData() {
+  const [id, setId] = useState(1);
+  const [post, setPost] = useState(null);
+  const [isButtonClicked, setIsButtonClicked] = useState(1);
+
+  useEffect(() => {
+    axios
+      .get(`https://jsonplaceholder.typicode.com/posts/${id}`)
+      .then((res) => {
+        console.log(res.data);
+        setPost(res.data);
+      })
+      .catch((error) => console.log(error));
+  }, [isButtonClicked]);
+
+  const fetchData = () => {
+    setIsButtonClicked(id);
+  };
+  return (
+    <div>
+      <input value={id} onChange={(e) => setId(e.target.value)} />
+      <button onClick={fetchData}>Fetch Data</button>
+
+      <p>{post?.title}</p>
+    </div>
+  );
+}
+
+export default FetchData;
+```
+
+### useContext
+
+- We already have context explained above, Follow the link [Context](#react-context)
+
+- talking about the `useContext` we can only use this hook to consume the data, providing logic will remain same
+
+**_Example 1_**
+
+```javascript
+import { UserContext } from "./UserContext";
+
+function ComponentF() {
+  return (
+    <UserContext.Consumer>
+      {(username) => {
+        return (
+          <ChannelContext.Consumer>
+            {(channel) => {
+              return (
+                <div>
+                  <h1>Component F</h1>
+                  <p>UserName: {username}</p>
+                  <p>channel: {channel}</p>
+                </div>
+              );
+            }}
+          </ChannelContext.Consumer>
+        );
+      }}
+    </UserContext.Consumer>
+  );
+}
+```
+
+- in above example we are using nested contexts we can write this in a much simpler way using `useContext` hook
+
+**_Example 2_**
+
+```javascript
+import { UserContextConsumer, ChannelContextConsumer } from "./UserContext";
+
+function ComponentF() {
+  const username = useContext(UserContextConsumer);
+  const channel = useContext(ChannelContextConsumer);
+
+  return (
+    <div>
+      <h1>Component F</h1>
+      <p>UserName: {username}</p>
+      <p>channel: {channel}</p>
+    </div>
+  );
+}
+```
+
+### `useReducer`
+
+- Reducer is a state management hook in React
+
+```javascript
+import React, { useReducer } from "react";
+
+const initialValue = 0;
+const reduce = (state, action) => {
+  switch (action) {
+    case "increment":
+      return state + 1;
+    case "decrement":
+      return state - 1;
+    case "reset":
+      return initialValue;
+    default:
+      return state;
+  }
+};
+function CountReducer() {
+  const [count, dispatch] = useReducer(reduce, initialValue);
+  return (
+    <div>
+      <div>Count: {count}</div>
+      <button onClick={() => dispatch("increment")}>Increment</button>
+      <button onClick={() => dispatch("decrement")}>decrement</button>
+      <button onClick={() => dispatch("reset")}>reset</button>
+    </div>
+  );
+}
+
+export default CountReducer;
+```
+
+### Reducer with Context
+
+```javascript
+try it by yourself
+```
+
+### Fetching API using reducer
+
+```javascript
+try it by yourself
+```
+
+### useCallBack & React.memo
+
+```javascript
+import React, { useCallback, useState } from "react";
+import Title from "./Title";
+import Count from "./Count";
+import Button from "./Button";
+function ParentComponent({ text, cb }) {
+  const [age, setAge] = useState(25);
+  const [salary, setSalary] = useState(1000);
+
+  const increaseAge = useCallback(() => {
+    setAge(age + 1);
+  }, [age]);
+
+  const increaseSalary = useCallback(() => {
+    setSalary(salary + 1000);
+  }, [salary]);
+  return (
+    <div>
+      <Title />
+      <Count text="Age" count={age} />
+      <Button text="Age" cb={increaseAge} />
+      <Count text="Salary" count={salary} />
+      <Button text="Salary" cb={increaseSalary} />
+    </div>
+  );
+}
+
+export default ParentComponent;
+```
+
+### useMemo
+- this hook is used to optimise performance,
